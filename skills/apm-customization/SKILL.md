@@ -3,6 +3,18 @@ name: apm-customization
 description: 指导 AI 助手定制 APM 模板、构建 release，并维护自定义 APM 仓库。
 ---
 
+## 0. 纯中文本土化执行规范
+
+本文件是 APM 中文本土化版本。执行时必须遵守以下规则：
+
+- 本文件的中文说明就是实际执行口径，不需要再参考英文原文。
+- 面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。
+- APM 项目产物正文必须使用中文，包括 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
+- 可以保留英文的内容仅限命令、路径、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法、协议字段、库名、框架名和行业通用缩写。
+- 不得为了节省上下文而删除流程约束。必须保留审批门槛、上下文边界、依赖判定、验证标准、日志格式、Message Bus、Handoff、Recovery、Tracker 和 Memory 相关规则。
+- 如果发现规则缺口，用中文补足；不要回退到英文说明。
+
+---
 # APM Customization Skill 中文版
 
 ## 1. 目标
@@ -112,182 +124,3 @@ apm custom -r <owner>/<repo> -t v1.0.1-cn.1
 ---
 
 **Skill 结束**
----
-
-## 中文执行优先与原版契约保留说明
-
-本文件采用“双层结构”：上半部分是面向中文使用者的本土化执行层，下半部分保留上游 APM 原版完整行为契约。
-
-执行时必须遵守以下优先级：
-
-- **中文执行层是本分叉的实际执行口径和输出语言权威。** 不得因为后文保留英文原版契约，就把面向用户或项目产物的正文改成英文。
-- **所有面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。**
-- **所有 APM 项目产物正文必须使用中文。** 包括但不限于 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
-- 文件路径、命令、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法和协议字段可以保留英文，以保证 APM 格式兼容；但这些字段对应的说明性正文必须中文。
-- 英文原版契约只用于补足流程细节和约束强度，例如审批门槛、上下文边界、依赖判定、日志格式、交接流程和验证标准；**它不具有输出语言优先级**。
-- 如果中文执行层没有覆盖某个流程细节，参考后文英文原版契约补齐；补齐时仍必须按中文执行层的语言规则输出中文产物。
-- 如果中文执行层与英文原版契约存在理解差异，采用更严格、更具体、更能约束 Agent 行为的规则，但不得违反“中文输出和中文项目产物”要求。
-
-<!-- APM_CN_ORIGINAL_CONTRACT_START -->
-
-# Original APM Behavioral Contract (Preserved as Process Fallback)
-
-以下为上游 APM 原版内容，仅作为流程完整性和约束强度的兜底参考。执行和产物输出必须遵守上方中文执行层的语言优先级。
----
-name: apm-customization
-description: Guides an AI agent through customizing APM templates, building releases, and managing a custom APM repository.
----
-
-# APM Customization Skill
-
-## 1. Overview
-
-**Reading Agent:** Any AI assistant working within a forked or templated APM repository
-
-This skill guides the customization of APM templates. It assumes the Agent is operating within the APM codebase itself (a fork or template of the official repository) and can explore the repository structure directly.
-
-### 1.1 Objectives
-
-- Navigate the APM repository structure and understand what each part does
-- Make targeted changes to templates, commands, guides, skills, or agent configurations
-- Build and test changes locally
-- Produce releases that can be installed via `apm custom`
-
-### 1.2 How to Use
-
-The User describes what they want to change or add. The Agent explores the relevant parts of the repository, proposes changes, and implements them after User approval. This skill provides the orientation needed to find the right files and understand how they connect.
-
----
-
-## 2. Repository Structure
-
-Explore the repository to understand the layout. The key directories are:
-
-**`templates/`** - The source files that become the APM installation. Everything the User receives when running `apm init` or `apm custom` originates here. Changes to APM's workflow, procedures, communication patterns, or agent behavior happen in this directory.
-
-**`templates/commands/`** - Slash commands the User sends to the model. These are the entry points for each Agent role (Planner, Manager, Worker) and for workflow actions (check-tasks, check-reports, handoff, recover, summarize).
-
-**`templates/guides/`** - Procedural files Agents read autonomously. Each guide contains a single procedure with operational standards, step-by-step actions, output specifications, and content guidelines. Guides are the most detailed procedural documents in the system.
-
-**`templates/skills/`** - Shared capabilities read by multiple Agent roles. Each skill lives in its own directory with a `SKILL.md` file and optional supporting files.
-
-**`templates/agents/`** - Subagent configurations shipped with APM bundles.
-
-**`templates/apm/`** - Artifact templates that become the `.apm/` directory (Spec, Plan, Tracker, Memory Index templates).
-
-**`templates/_standards/`** - Development-time specifications that define how templates should be written. These files are not included in builds. Read them to understand the design rules:
-- `WORKFLOW.md` - The formal workflow specification. This is the source of truth for all behavior. Any change to APM's workflow must be reflected here first, then propagated to runtime files.
-- `TERMINOLOGY.md` - Formal vocabulary and defined concepts
-- `STRUCTURE.md` - Structural standards for each file type
-- `WRITING.md` - Writing patterns, tone, formatting
-- `NOTES.md` - Development notes and research findings for the official repository. Internal development doc, not relevant to custom repos unless the User has added their own entries.
-
-**`build/`** - The build system that processes templates into platform-specific bundles. `build-config.json` defines the supported targets (assistants) and their directory layouts.
-
-**`src/`** - The `agentic-pm` CLI source code. Changes here affect the CLI tool itself, not the templates.
-
-**`skills/`** - Standalone skills (like this one) that are not part of the main APM bundles.
-
----
-
-## 3. How Templates Become Installations
-
-Templates use placeholders that the build system resolves per platform at build time. Understanding this is essential for making changes.
-
-Explore `build/processors/placeholders.js` to see all supported placeholders. Common ones include:
-
-- `{VERSION}` - Release version
-- `{RULES_FILE}` - Platform-specific rules file name (e.g. `CLAUDE.md`, `AGENTS.md`)
-- `{SKILL_PATH:name}` - Resolved path to a skill file
-- `{GUIDE_PATH:name}` - Resolved path to a guide file
-- `{COMMAND_PATH:name}` - Resolved path to a command file
-- `{ARGS}` - Platform-specific argument syntax
-- `{SUBAGENT_GUIDANCE}` - Platform-native subagent invocation
-
-Explore `build/build-config.json` to see each target's directory layout, format (Markdown or TOML), and platform-specific values.
-
-**Building locally:**
-
-```bash
-npm install
-npm run build:release
-```
-
-This produces a `dist/` directory with ZIP bundles per assistant and an `apm-release.json` manifest. The User can test locally by extracting a bundle into a project.
-
----
-
-## 4. Making Changes
-
-When the User requests a change, identify which layer it affects. All workflow changes follow a top-down propagation:
-
-1. **Update `WORKFLOW.md` first** - Any change that affects APM's behavior, procedures, or coordination patterns must be reflected in the workflow specification before modifying runtime files. `WORKFLOW.md` is the source of truth.
-2. **Propagate to runtime files** - Commands, guides, skills, and agent configurations implement the workflow spec. Update these to match the changes made in `WORKFLOW.md`, following the conventions in `STRUCTURE.md`, `WRITING.md`, and `TERMINOLOGY.md`.
-
-Changes that do not affect the workflow (e.g. adjusting wording within existing procedures, adding examples to guidance fields) can be made directly in runtime files without updating `WORKFLOW.md`.
-
-### Template Content Changes
-
-Most customizations involve modifying template files in `templates/`. The `_standards/` files define the conventions:
-
-- Commands follow structural profiles defined in `STRUCTURE.md` (strict for initiation, lightweight for utility)
-- Guides follow a five-section pattern (Overview, Operational Standards, Procedure, Structural Specifications, Content Guidelines)
-- Skills have a required Overview section and free-form internal organization
-- All files use the terminology defined in `TERMINOLOGY.md`
-- Writing follows the patterns in `WRITING.md` (imperative mood, token efficiency, de-duplication)
-
-Read the relevant `_standards/` file before making changes to understand the conventions in play.
-
-### Adding New Files
-
-When adding a new guide, skill, command, or agent:
-
-1. Follow the structural conventions from `STRUCTURE.md` for that file type
-2. Add YAML frontmatter where required (commands and skills require it, guides do not)
-3. Use placeholders for any paths, rules file references, or platform-specific values
-4. Update cross-references in other files if the new file should be loaded by an Agent
-
-### Build Configuration Changes
-
-If adding a new target (assistant), modify `build/build-config.json` to add the target definition with its directories, format, and platform-specific values. Explore existing targets as examples.
-
-### CLI Changes
-
-Changes to `src/` affect the CLI tool. These follow different conventions defined in `src/_standards/CLI.md` and require their own release cycle (npm publish, separate from template releases).
-
----
-
-## 5. Releasing
-
-After making changes, the User creates a release that can be installed via `apm custom`.
-
-1. **Build** - Run `npm run build:release` to generate bundles in `dist/`
-2. **Test** - Extract a bundle into a test project and verify the changes work
-3. **Tag** - Create a git tag following the versioning convention
-4. **Release** - Create a GitHub Release and attach all files from `dist/` (the ZIP bundles and `apm-release.json`)
-
-The `apm-release.json` manifest is what the CLI reads to discover available assistants in the release. Explore `build/generators/manifest.js` to understand its structure.
-
-Note: the `.github/workflows/` directory contains CI workflows configured for the official APM repository's release pipeline. These workflows are tailored to the official repo's versioning and publishing process. For custom repositories, the manual build-tag-release approach described above is more straightforward. The User can set up their own CI workflows if needed, but the official ones should not be assumed to work as-is in a fork.
-
-Users install from the custom repository with:
-
-```bash
-apm custom -r owner/repo
-```
-
----
-
-## 6. Communicating Changes
-
-When the User's custom repository diverges from the official APM release, changes should be documented:
-
-- Update the repository's README to describe what was customized and why
-- If the changes affect the workflow (new procedures, modified coordination patterns), note how the customization differs from the official documentation
-- If adding new commands or skills, document their purpose and usage
-
-Custom repositories carry trust implications for anyone who installs from them. Bundles can write files anywhere within the project directory, and the templates define how AI assistants behave. When publishing a custom repository, document what the customization changes so users can make informed trust decisions. If the customization adds files outside the standard assistant config directory (e.g., source files, configuration), note this explicitly in the README.
-
----
-
-**End of Skill**

@@ -3,6 +3,18 @@ command_name: handoff-manager
 description: 执行 APM Manager Handoff。
 ---
 
+## 0. 纯中文本土化执行规范
+
+本文件是 APM 中文本土化版本。执行时必须遵守以下规则：
+
+- 本文件的中文说明就是实际执行口径，不需要再参考英文原文。
+- 面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。
+- APM 项目产物正文必须使用中文，包括 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
+- 可以保留英文的内容仅限命令、路径、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法、协议字段、库名、框架名和行业通用缩写。
+- 不得为了节省上下文而删除流程约束。必须保留审批门槛、上下文边界、依赖判定、验证标准、日志格式、Message Bus、Handoff、Recovery、Tracker 和 Memory 相关规则。
+- 如果发现规则缺口，用中文补足；不要回退到英文说明。
+
+---
 # APM {VERSION} - Manager Handoff 命令
 
 ## 1. 目标
@@ -144,124 +156,3 @@ stage: <N>
 ---
 
 **命令结束**
----
-
-## 中文执行优先与原版契约保留说明
-
-本文件采用“双层结构”：上半部分是面向中文使用者的本土化执行层，下半部分保留上游 APM 原版完整行为契约。
-
-执行时必须遵守以下优先级：
-
-- **中文执行层是本分叉的实际执行口径和输出语言权威。** 不得因为后文保留英文原版契约，就把面向用户或项目产物的正文改成英文。
-- **所有面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。**
-- **所有 APM 项目产物正文必须使用中文。** 包括但不限于 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
-- 文件路径、命令、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法和协议字段可以保留英文，以保证 APM 格式兼容；但这些字段对应的说明性正文必须中文。
-- 英文原版契约只用于补足流程细节和约束强度，例如审批门槛、上下文边界、依赖判定、日志格式、交接流程和验证标准；**它不具有输出语言优先级**。
-- 如果中文执行层没有覆盖某个流程细节，参考后文英文原版契约补齐；补齐时仍必须按中文执行层的语言规则输出中文产物。
-- 如果中文执行层与英文原版契约存在理解差异，采用更严格、更具体、更能约束 Agent 行为的规则，但不得违反“中文输出和中文项目产物”要求。
-
-<!-- APM_CN_ORIGINAL_CONTRACT_START -->
-
-# Original APM Behavioral Contract (Preserved as Process Fallback)
-
-以下为上游 APM 原版内容，仅作为流程完整性和约束强度的兜底参考。执行和产物输出必须遵守上方中文执行层的语言优先级。
----
-command_name: handoff-manager
-description: Perform a Handoff with an APM Manager.
----
-
-# APM {VERSION} - Manager Handoff Command
-
-## 1. Overview
-
-This command initiates the Handoff procedure for a Manager approaching context window limits. You create two artifacts:
-- **Handoff Log:** Working context not captured in planning documents or Task Logs, stored in `.apm/memory/handoffs/manager/`.
-- **Handoff prompt:** Written to the Handoff Bus, instructing the incoming Manager to reconstruct context procedurally.
-
-The incoming Manager rebuilds working context from planning documents, guides, skills, Task Logs, and the Handoff Log - not from the Handoff Log alone.
-
----
-
-## 2. Handoff Procedure
-
-Execute when User initiates Handoff.
-
-### 2.1 Handoff Log Creation
-
-Perform the following actions:
-1. Determine instance numbers: your current instance number and incoming Manager instance number (yours + 1).
-2. Create Handoff Log per §3 Handoff Log Structure, capturing **past actions** - what was done, decided, and observed. Content is strictly past tense; current state belongs in the handoff prompt.
-   - Coordination overview: Stages managed, Tasks reviewed, dispatch cycles completed.
-   - Tracked Worker Handoffs (which Workers, from which Stage) - most critical for dependency context treatment.
-   - If auto-compaction occurred during this instance, note it and describe which portions of working context are reconstructed rather than first-hand from the summary.
-   - VC state extracted from the Tracker in context: active branches, worktrees, pending merges.
-   - User preferences and communication patterns.
-   - Coordination insights, decisions made, approaches tried.
-
-### 2.2 Handoff Prompt Creation
-
-Perform the following actions:
-1. Create handoff prompt per §4 Handoff Prompt Structure, capturing **current state** - what is happening now. Content is actionable and present-tense; past actions belong in the Handoff Log.
-   - Outstanding Tasks in full: objectives, expected outputs, detailed instructions, review criteria, relevant Spec sections, dependency context, workspace information.
-   - Mid-review progress and pending review outcomes.
-   - Active Workers and their dispatch state.
-   - Pointers to Task Logs and files for the incoming Manager to read.
-
-### 2.3 User Review and Finalization
-
-Perform the following actions:
-1. Write handoff prompt to the Handoff Bus: `.apm/bus/manager/handoff.md`.
-2. Present both artifacts to User: Handoff Log (file path) and handoff prompt (bus path). Request review and direct User to start a new chat and run `/apm-2-initiate-manager` - the incoming Manager will auto-detect the handoff prompt.
-3. If modifications requested, update accordingly. This completes the outgoing Manager's duties.
-
----
-
-## 3. Handoff Log Structure
-
-Contains working context not captured in planning documents or Task Logs. The incoming Manager reconstructs primary context from artifacts - this file provides supplementary context.
-
-**Location:** `.apm/memory/handoffs/manager/handoff-<NN>.log.md`
-
-**YAML Frontmatter Schema:**
-```yaml
----
-agent: manager
-outgoing: <N>
-incoming: <N+1>
-handoff: <N>
-stage: <N>
----
-```
-
-**Field Descriptions:**
-- `agent`: Always `manager`.
-- `outgoing`: Current instance number.
-- `incoming`: Next instance number.
-- `handoff`: Handoff sequence number (equals the outgoing instance number).
-- `stage`: Current Stage number.
-
-**Body:**
-- *Title:* `# Manager Handoff <N> (Manager <N> → Manager <N+1>)`. Each section uses `##` heading.
-- *Summary:* Stages coordinated, Tasks reviewed, dispatch cycles completed.
-- *Working Context.* Tracked Worker Handoffs table (Agent, Handoff Stage, current-Stage logs loaded, notes) with dependency context implication. VC state: active branches, worktrees, pending merges, base branch. Dispatch patterns.
-- *Working Notes:* Coordination insights, User preferences, decisions made, approaches tried.
-
----
-
-## 4. Handoff Prompt Structure
-
-Written to `.apm/bus/manager/handoff.md`. The incoming Manager processes this prompt during auto-detection in the init command.
-
-**Required content:**
-- *Identity:* Outgoing and incoming instance numbers.
-- *Rebuilding context:*
-  1. Read Handoff Log - note tracked Worker Handoffs and VC state.
-  2. Read current-Stage Task Logs (all agents).
-  3. For previous-Stage dependency context encountered later: read the specific Task Log on demand. If the Task Log is insufficient, read referenced files to reconstruct context.
-- *Current State:* Current Stage, Stage progress, next Task, blockers, working notes.
-- *Immediate Next Action:* Specific coordination action to resume.
-- *Closing instruction:* Output a concise understanding summary (project state, Worker Handoffs and implications, VC state, next action) then proceed with coordination.
-
----
-
-**End of Command**

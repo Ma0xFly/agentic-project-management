@@ -3,6 +3,18 @@ command_name: handoff-worker
 description: 执行 APM Worker Handoff。
 ---
 
+## 0. 纯中文本土化执行规范
+
+本文件是 APM 中文本土化版本。执行时必须遵守以下规则：
+
+- 本文件的中文说明就是实际执行口径，不需要再参考英文原文。
+- 面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。
+- APM 项目产物正文必须使用中文，包括 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
+- 可以保留英文的内容仅限命令、路径、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法、协议字段、库名、框架名和行业通用缩写。
+- 不得为了节省上下文而删除流程约束。必须保留审批门槛、上下文边界、依赖判定、验证标准、日志格式、Message Bus、Handoff、Recovery、Tracker 和 Memory 相关规则。
+- 如果发现规则缺口，用中文补足；不要回退到英文说明。
+
+---
 # APM {VERSION} - Worker Handoff 命令
 
 ## 1. 目标
@@ -135,128 +147,3 @@ stage: <N>
 ---
 
 **命令结束**
----
-
-## 中文执行优先与原版契约保留说明
-
-本文件采用“双层结构”：上半部分是面向中文使用者的本土化执行层，下半部分保留上游 APM 原版完整行为契约。
-
-执行时必须遵守以下优先级：
-
-- **中文执行层是本分叉的实际执行口径和输出语言权威。** 不得因为后文保留英文原版契约，就把面向用户或项目产物的正文改成英文。
-- **所有面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。**
-- **所有 APM 项目产物正文必须使用中文。** 包括但不限于 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
-- 文件路径、命令、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法和协议字段可以保留英文，以保证 APM 格式兼容；但这些字段对应的说明性正文必须中文。
-- 英文原版契约只用于补足流程细节和约束强度，例如审批门槛、上下文边界、依赖判定、日志格式、交接流程和验证标准；**它不具有输出语言优先级**。
-- 如果中文执行层没有覆盖某个流程细节，参考后文英文原版契约补齐；补齐时仍必须按中文执行层的语言规则输出中文产物。
-- 如果中文执行层与英文原版契约存在理解差异，采用更严格、更具体、更能约束 Agent 行为的规则，但不得违反“中文输出和中文项目产物”要求。
-
-<!-- APM_CN_ORIGINAL_CONTRACT_START -->
-
-# Original APM Behavioral Contract (Preserved as Process Fallback)
-
-以下为上游 APM 原版内容，仅作为流程完整性和约束强度的兜底参考。执行和产物输出必须遵守上方中文执行层的语言优先级。
----
-command_name: handoff-worker
-description: Perform a Handoff with an APM Worker.
----
-
-# APM {VERSION} - Worker Handoff Command
-
-## 1. Overview
-
-This command initiates the Handoff procedure for a Worker approaching context window limits. You create two artifacts:
-- **Handoff Log:** Working context from the current instance, stored in `.apm/memory/handoffs/<agent>/`.
-- **Handoff prompt:** Written to the Handoff Bus, instructing the incoming Worker to reconstruct context.
-
-The incoming Worker rebuilds working context from the Handoff Log and current Stage Task Logs - not from the Handoff Log alone.
-
-The incoming Worker must indicate Handoff status in their first Task Report. This triggers the Manager's Handoff detection, which affects dependency context classification for future Task assignments.
-
----
-
-## 2. Handoff Procedure
-
-Execute when User initiates Handoff.
-
-### 2.1 Handoff Log Creation
-
-Perform the following actions:
-1. Determine instance numbers: your current instance number and incoming Worker instance number (yours + 1).
-2. Create Handoff Log per §3 Handoff Log Structure, capturing **past actions** - what was done, tried, and observed. Content is strictly past tense; current state belongs in the handoff prompt.
-   - Tasks completed and Stage progress this instance.
-   - Working context, patterns, and approaches established during this instance.
-   - Technical notes not captured in Task Logs.
-   - If mid-Task, include execution progress framed as past work (steps completed, approaches tried).
-   - If auto-compaction occurred during this instance, note it and describe which portions of working context are reconstructed rather than first-hand from the summary.
-
-### 2.2 Handoff Prompt Creation
-
-Perform the following actions:
-1. Create handoff prompt per §4 Handoff Prompt Structure, capturing **current state** - what is happening now. Content is actionable and present-tense; past actions belong in the Handoff Log.
-2. Apply Worker Handoff asymmetry:
-   - *Mid-Task:* "Read the Task from `task.md`, I completed steps 1-4, resume from step 5." Direct the incoming Worker to read the Task Bus file directly (intact since Task receipt). Include execution progress detail.
-   - *Mid-batch:* The batch is still in `task.md`. Describe the state of each Task in the batch - which are complete (logs written), which is in progress and how far, and which have not been started. The incoming Worker reads the intact batch from the Task Bus and continues from where work left off.
-   - *Between-Tasks:* "No active Task, await `/apm-4-check-tasks`." State context and readiness.
-3. Include: Handoff Log path, instructions to read current Stage Task Logs, and reminder to indicate incoming Worker status in first Task Report (listing specific Task Log files loaded and, when previous Stages exist, noting that previous-Stage logs were not loaded).
-
-### 2.3 User Review and Finalization
-
-Perform the following actions:
-1. Write handoff prompt to the Handoff Bus: `.apm/bus/<agent-slug>/handoff.md`.
-2. Present both artifacts to User: Handoff Log (file path) and handoff prompt (bus path). Request review and direct User to start a new chat and run `/apm-3-initiate-worker <agent-id>` - the incoming Worker will auto-detect the handoff prompt.
-3. If modifications requested, update accordingly. This completes the outgoing Worker's duties.
-
----
-
-## 3. Handoff Log Structure
-
-Contains working context from this instance that supports the incoming Worker's execution. Task Logs contain Task-specific details - this file provides instance-level context.
-
-**Location:** `.apm/memory/handoffs/<agent>/handoff-<NN>.log.md`
-
-**YAML Frontmatter Schema:**
-```yaml
----
-agent: <agent-slug>
-outgoing: <N>
-incoming: <N+1>
-handoff: <N>
-stage: <N>
----
-```
-
-**Field Descriptions:**
-- `agent`: Worker identifier (kebab-case).
-- `outgoing`: Current instance number.
-- `incoming`: Next instance number.
-- `handoff`: Handoff sequence number (equals the outgoing instance number).
-- `stage`: Current Stage number.
-
-**Body:**
-- *Title:* `# <Display Name> Handoff <N> (<Display Name> <N> → <Display Name> <N+1>)`. Each section uses `##` heading. The display name is the Title Case form of the agent identifier (e.g., `frontend-agent` → `Frontend Agent`).
-- *Summary:* Tasks completed count, current Stage, Stage progress for this Worker.
-- *Working Context:* Patterns, approaches, or context established during this instance.
-- *Working Notes:* Technical details, environment observations, or other context not captured in Task Logs.
-
----
-
-## 4. Handoff Prompt Structure
-
-Written to `.apm/bus/<agent-slug>/handoff.md`. The incoming Worker processes this prompt during auto-detection in the init command.
-
-**Required content:**
-- *Identity:* Outgoing and incoming instance numbers.
-- *Rebuilding context:*
-  1. Read Handoff Log - note working context and technical notes.
-  2. Read current Stage Task Logs (this Worker's logs only).
-  3. Do not load previous-Stage logs - the Manager provides comprehensive context via Task Prompts for cross-Stage dependencies.
-- *Current State:* Current Stage, Tasks completed this instance, notes.
-- *Continuation guidance:* Specific guidance for the incoming Worker about in-progress patterns or upcoming work.
-- *Incoming Worker indication:* Remind incoming Worker to include Handoff status in first Task Report - state instance number, list specific Task Log files loaded, and when previous Stages exist note that previous-Stage logs were not loaded. This triggers Manager Handoff detection.
-- *Immediate Next Action:* For mid-Task or mid-batch, instruct the incoming Worker to read the Task Bus and continue. For between-Tasks, state readiness to await `/apm-4-check-tasks`.
-- *Closing instruction:* Confirm to User that Handoff Log and Stage context have been read, then state readiness.
-
----
-
-**End of Command**

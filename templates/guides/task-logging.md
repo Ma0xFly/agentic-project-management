@@ -1,5 +1,17 @@
 # APM {VERSION} - Task Logging Guide
 
+## 0. 纯中文本土化执行规范
+
+本文件是 APM 中文本土化版本。执行时必须遵守以下规则：
+
+- 本文件的中文说明就是实际执行口径，不需要再参考英文原文。
+- 面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。
+- APM 项目产物正文必须使用中文，包括 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
+- 可以保留英文的内容仅限命令、路径、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法、协议字段、库名、框架名和行业通用缩写。
+- 不得为了节省上下文而删除流程约束。必须保留审批门槛、上下文边界、依赖判定、验证标准、日志格式、Message Bus、Handoff、Recovery、Tracker 和 Memory 相关规则。
+- 如果发现规则缺口，用中文补足；不要回退到英文说明。
+
+---
 ## 1. 适用角色
 
 **Reading Agent:** Worker
@@ -31,6 +43,8 @@ Worker 写入的 Task Log 和 Task Report 必须使用中文正文。
 
 不要因为“做了很多努力”就标记 `Success`。状态只看结果。
 
+`Success` 必须同时满足：Objective 达成、Output 完整、所有自主 Validation 已执行并通过、需要用户参与的验收点已明确暂停或已获得反馈、没有未解释的阻塞。只完成部分交付物、测试未跑、验证不完整、或关键风险未解决时，不能标记 `Success`。
+
 ### 2.2 Flags
 
 `important_findings`：
@@ -46,6 +60,8 @@ Worker 写入的 Task Log 和 Task Report 必须使用中文正文。
 - 发现集成风险。
 
 不确定时设为 `true`。误报比漏报更容易处理。
+
+flags 不是失败标记，而是 Manager 注意力路由。`important_findings: true` 表示可能需要更新 Spec、Plan、Rules 或影响后续任务；`compatibility_issues: true` 表示可能需要集成判断、迁移处理或返工。
 
 ---
 
@@ -108,6 +124,8 @@ compatibility_issues: true | false
 仅当 `important_findings: true` 时包含。
 ```
 
+Task Log 的正文要让 Manager 不读完整聊天记录也能判断任务是否可接受。Validation 中必须写清楚命令、结果、失败修复过程和未执行项原因。Output 中必须列出关键文件路径和交付物，不要只写“已完成”。
+
 ---
 
 ## 4. Task Report
@@ -139,6 +157,8 @@ compatibility_issues: true | false
 ```
 
 正文用 1-2 句话总结结果，并引用 Task Log 路径。详细内容放 Task Log，不要塞进 Report。
+
+Task Report 是触发 Manager 审查的信号，不是完整复盘。Report 必须准确反映 `status` 和 flags，不能为了简短省略 `important_findings` 或 `compatibility_issues`。
 
 完成后提示用户回到 Manager 会话运行：
 
@@ -194,276 +214,8 @@ tasks:
 **Task Log:** `<log_path>`
 ```
 
+Batch 中每个 Task 都必须有独立 Task Log。某个 Task 失败导致 batch 提前停止时，未开始任务必须标记为 `"Not started"`，不要伪造成 Failed。
+
 ---
 
 **Guide 结束**
----
-
-## 中文执行优先与原版契约保留说明
-
-本文件采用“双层结构”：上半部分是面向中文使用者的本土化执行层，下半部分保留上游 APM 原版完整行为契约。
-
-执行时必须遵守以下优先级：
-
-- **中文执行层是本分叉的实际执行口径和输出语言权威。** 不得因为后文保留英文原版契约，就把面向用户或项目产物的正文改成英文。
-- **所有面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。**
-- **所有 APM 项目产物正文必须使用中文。** 包括但不限于 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
-- 文件路径、命令、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法和协议字段可以保留英文，以保证 APM 格式兼容；但这些字段对应的说明性正文必须中文。
-- 英文原版契约只用于补足流程细节和约束强度，例如审批门槛、上下文边界、依赖判定、日志格式、交接流程和验证标准；**它不具有输出语言优先级**。
-- 如果中文执行层没有覆盖某个流程细节，参考后文英文原版契约补齐；补齐时仍必须按中文执行层的语言规则输出中文产物。
-- 如果中文执行层与英文原版契约存在理解差异，采用更严格、更具体、更能约束 Agent 行为的规则，但不得违反“中文输出和中文项目产物”要求。
-
-<!-- APM_CN_ORIGINAL_CONTRACT_START -->
-
-# Original APM Behavioral Contract (Preserved as Process Fallback)
-
-以下为上游 APM 原版内容，仅作为流程完整性和约束强度的兜底参考。执行和产物输出必须遵守上方中文执行层的语言优先级。
-# APM {VERSION} - Task Logging Guide
-
-## 1. Overview
-
-**Reading Agent:** Worker
-
-This guide defines how you log Task outcomes and report results. Task Logs capture Task-level context using structured markdown files, enabling the Manager to track progress and make review decisions without parsing raw code or chat history.
-
-### 1.1 Outputs
-
-- *Task Log:* Structured log at `.apm/memory/stage-<NN>/task-<NN>-<MM>.log.md` capturing outcome, validation, deliverables, and flags.
-- *Task Report:* Concise summary written to the Report Bus for the Manager to process.
-
----
-
-## 2. Operational Standards
-
-### 2.1 Flag Assessment Standards
-
-Boolean flags in YAML frontmatter signal conditions requiring Manager attention. Set flags based on what you observed during execution relative to your Task Prompt and working context.
-
-**`important_findings`:** Set to `true` when execution revealed information not in your Task Prompt that seems project-relevant, you discovered dependencies, risks, or constraints your Task Prompt didn't account for, or something suggests other Tasks or agents might be affected.
-
-**`compatibility_issues`:** Set to `true` when your output conflicts with existing code, patterns, or conventions you touched, you discovered integration concerns that might affect other parts of the system, or breaking changes or migration requirements resulted from your work.
-
-**Default:** When uncertain whether a finding warrants a flag, set to `true`. False negatives hurt coordination more than false positives.
-
-### 2.2 Outcome Standards
-
-Status reflects whether the objective was achieved. Select based on end state, not effort expended.
-
-- *Success:* Objective achieved, all validation passed.
-- *Partial:* Some progress made but incomplete; you need guidance to continue.
-- *Failed:* Objective not achieved; you attempted but could not resolve the issue.
-
-Use Partial when: validation is ambiguous, important findings emerged that could affect other Tasks, iteration stalled with recurring failures, or approach uncertainty depends on factors outside your scope. Continue iterating (do not log yet) when validation failed but the cause is clear and fixable, no findings require Manager awareness, and progress is being made.
-
-### 2.3 Detail Level Standards
-
-Task Logs serve the Manager's coordination needs, not archival documentation. Ask: does this detail help the Manager understand what was accomplished? Would it affect the Manager's next review decision? Can it be found by reading the referenced artifacts directly?
-
-**Default:** Prefer concise but comprehensive summaries with artifact references over verbose inline content. Reference artifacts by path rather than including large code blocks. Include code snippets only for novel, complex, or critical logic (20 lines or fewer). For error messages, include relevant stack traces or diagnostic details.
-
----
-
-## 3. Task Logging Procedure
-
-Two sequential steps after Task completion: write the Task Log, then deliver the Task Report via the bus. Execute after Task completion per `{GUIDE_PATH:task-execution}` §3.6 Task Completion.
-
-### 3.1 Task Log Procedure
-
-After Task execution, populate the Task Log at the path provided in the Task Prompt (`log_path`).
-
-Perform the following actions:
-1. From the completion assessment already presented in chat per `{GUIDE_PATH:task-execution}` §3.6 Task Completion, determine what to capture in the Task Log.
-2. Complete YAML frontmatter fields:
-   - Set `status` per §2.2 Outcome Standards.
-   - Set `important_findings` and `compatibility_issues` per §2.1 Flag Assessment Standards.
-   - Set `stage`, `task`, `title`, and `agent` from the Task Prompt.
-3. Complete markdown body sections per §4.1 Task Log Format. Always include: Summary, Details, Output, Validation, Issues. Include conditional sections (Compatibility Concerns, Important Findings) only when their corresponding flag is `true`.
-4. Write the Task Log to `log_path`.
-
-### 3.2 Task Report Delivery
-
-Perform the following actions:
-1. Clear the incoming Task Bus: truncate `.apm/bus/<agent-slug>/task.md` via terminal (e.g., `truncate -s 0` or shell redirection).
-2. Read the Report Bus, then write the Task Report to it: `.apm/bus/<agent-slug>/report.md`. The report is a concise summary - key outcome, status, log path, and any flags. Detail belongs in the Task Log.
-3. Direct the User to deliver the report to the Manager per `{SKILL_PATH:apm-communication}` §2.1 Direct Communication - provide both `/apm-5-check-reports <agent-id>` for targeted retrieval and `/apm-5-check-reports` as the general command, since multiple Workers may finish concurrently.
-
-For batch execution, write a single batch report per §4.3 Batch Report Format after completing all Tasks (or stopping on failure).
-
----
-
-## 4. Structural Specifications
-
-### 4.1 Task Log Format
-
-**Location:** `.apm/memory/stage-<NN>/task-<NN>-<MM>.log.md`
-
-**Naming Convention:**
-- `<NN>`: Stage number, zero-padded (e.g., 01, 02).
-- `<MM>`: Task number within Stage, zero-padded (e.g., 01, 02).
-
-**YAML Frontmatter Schema:**
-
-```yaml
----
-stage: <N>
-task: <M>
-title: <Task title from Plan>
-agent: <agent-slug>
-status: Success | Partial | Failed
-important_findings: true | false
-compatibility_issues: true | false
----
-```
-
-**Field Descriptions:**
-- `stage`: Stage number from the Task Prompt.
-- `task`: Task number from the Task Prompt.
-- `title`: Task title from the Task Prompt.
-- `agent`: Your agent identifier.
-- `status`: Task outcome per §2.2 Outcome Standards. `Success`, `Partial`, or `Failed`.
-- `important_findings`: Whether discoveries have implications beyond current Task scope per §2.1 Flag Assessment Standards.
-- `compatibility_issues`: Whether output conflicts with existing systems per §2.1 Flag Assessment Standards.
-
-**Markdown Body Template:**
-
-```markdown
-# Task <N>.<M> - <Title>
-
-## Summary
-[1-2 sentences describing main outcome]
-
-## Details
-[Work performed, decisions made, steps taken in logical order. Note subagent usage when applicable.]
-
-## Output
-- File paths for created/modified files
-- Code snippets (if necessary, ≤20 lines)
-- Configuration changes
-- Results or deliverables
-
-## Validation
-[Description of validation performed and result]
-
-## Issues
-[Specific blockers or errors encountered, or "None"]
-
-## Compatibility Concerns
-[Only include if compatibility_issues: true]
-[Description of compatibility issues identified]
-
-## Important Findings
-[Only include if important_findings: true]
-[Project-relevant discoveries that Manager must know]
-```
-
-### 4.2 Task Report Format
-
-Task Reports are concise summaries written to the Report Bus for the Manager to process. Detail belongs in the Task Log - the report provides enough for the Manager to assess the outcome and locate the log.
-
-**Location:** `.apm/bus/<agent-slug>/report.md`
-
-**YAML Frontmatter Schema:**
-
-```yaml
----
-stage: <N>
-task: <M>
-agent: <agent-slug>
-status: Success | Partial | Failed
-log_path: ".apm/memory/stage-<NN>/task-<NN>-<MM>.log.md"
-important_findings: true | false
-compatibility_issues: true | false
----
-```
-
-**Field Descriptions:**
-- `stage`: Stage number from the Task Prompt.
-- `task`: Task number from the Task Prompt.
-- `agent`: Your agent identifier.
-- `status`: Task outcome per §2.2 Outcome Standards.
-- `log_path`: Path to the Task Log for this Task.
-- `important_findings`: Same value as the Task Log.
-- `compatibility_issues`: Same value as the Task Log.
-
-**Markdown Body:** 1-2 sentences summarizing the outcome. Reference the Task Log for detail.
-
-For batch reports, use §4.3 Batch Report Format instead.
-
-### 4.3 Batch Report Format
-
-When completing a batch of Tasks (or stopping early on failure), the Report Bus file uses this structure.
-
-**Location:** `.apm/bus/<agent-slug>/report.md`
-
-**YAML Frontmatter Schema:**
-
-```yaml
----
-batch: true
-batch_size: <N>
-completed: <M>
-stopped_early: true | false
-tasks:
-  - stage: 1
-    task: 1
-    status: Success
-  - stage: 1
-    task: 2
-    status: Failed
-  - stage: 1
-    task: 3
-    status: "Not started"
----
-```
-
-**Field Descriptions:**
-- `batch`: Always `true` for batch reports.
-- `batch_size`: Total Tasks in the batch.
-- `completed`: Tasks that were executed (excludes unstarted).
-- `stopped_early`: Whether the batch stopped before completing all Tasks.
-- `tasks[].stage`: Stage number.
-- `tasks[].task`: Task number within Stage.
-- `tasks[].status`: `Success`, `Partial`, `Failed`, or `"Not started"` for unexecuted Tasks.
-
-**Markdown Body Template:**
-
-```markdown
-# Batch Report
-
-## Summary
-[Brief overview: X of Y Tasks completed, stopped early if applicable]
-
-## Task Outcomes
-
-### <Title>
-**Status:** [Success | Partial | Failed]
-**Task Log:** `<log_path>`
-[1-2 sentence summary of outcome]
-
-...
-
-## Batch Notes
-[Any cross-cutting observations, patterns, or issues affecting multiple Tasks]
-```
-
-If the batch stopped early due to a Failed Task, indicate which Task caused the stop and list remaining Tasks as "Not started (batch stopped)."
-
----
-
-## 5. Content Guidelines
-
-### 5.1 Good vs Poor Logging
-- *Summary:* "Made some changes and fixed issues" → "Implemented POST /api/users with validation. All tests passing."
-- *Details:* "I worked on the endpoint and there were some issues" → "Added registration route with email/password validation using express-validator"
-- *Output:* "Changed some files" → "Modified: `routes/users.js`, `server.js`"
-- *Validation:* "It works now" → "Test suite: 5/5 passing. Manual testing confirmed expected responses."
-
-### 5.2 Common Mistakes
-
-- *Forgetting conditional sections:* When a flag is `true`, include the corresponding section (Compatibility Concerns, Important Findings).
-- *Missing artifact references:* When deliverables are produced, list file paths in the Output section.
-- *Deferred batch logging:* In batch execution, write each Task Log immediately after completing that Task - before starting the next. Deferring all logging to the end of a batch risks context loss if auto-compaction occurs mid-batch.
-
----
-
-**End of Guide**

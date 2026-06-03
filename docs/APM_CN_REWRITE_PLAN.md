@@ -9,8 +9,8 @@
 - 中文表达以可执行、可审查、可交接为目标。
 - 术语首次出现时保留英文对照，例如上下文窗口（Context Window）。
 - 不做压缩精简版。APM 的流程质量依赖高密度约束、审批门槛、上下文边界、依赖分类、验证标准和交接机制。
-- 运行时模板采用“双层结构”：中文执行层负责实际执行和输出语言，原版契约层负责流程完整性兜底。
-- 如果中文执行层与原版契约层存在理解差异，维护时应采用更严格、更具体、更能约束 Agent 行为的表达，但不能违反中文输出要求。
+- 运行时模板采用纯中文本土化，不保留英文原版契约层，避免占用上下文并诱导英文产物。
+- 维护时应把上游英文规则的精华吸收为中文规则：职责边界、流程 gate、上下文隔离、Message Bus、Tracker、Memory、Handoff、Recovery、验证和审查都必须保留。
 - 面向用户的对话、`.apm/spec.md`、`.apm/plan.md`、`Rules`、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes 的正文必须中文。
 
 ## 已本土化范围
@@ -36,12 +36,12 @@
 
 维护这些文件时必须遵守：
 
-- 不删除原版行为契约层。
+- 不恢复双语契约层。
 - 不删除审批 gate、报告格式、日志格式、dependency graph、Handoff、Recovery、Message Bus 等流程约束。
 - 不把 “Validation” 写成“确认无误”“功能正常”这类不可执行描述。
 - 不让 Worker 直接读取 Spec、Plan、Tracker 或 Index；Worker 的上下文边界必须保持。
 - 不把 Manager 的运行时协调职责提前写死到 Planner 的 Plan 中。
-- 不让英文原版契约层成为输出语言权威；英文只补流程细节，产物正文必须中文。
+- 不把英文说明塞回运行时模板；需要补规则时，用中文重写。
 
 ## 暂不修改
 

@@ -3,6 +3,18 @@ name: apm-archive-explorer
 description: 探索 APM 会话归档，为新规划会话提取上下文。
 ---
 
+## 0. 纯中文本土化执行规范
+
+本文件是 APM 中文本土化版本。执行时必须遵守以下规则：
+
+- 本文件的中文说明就是实际执行口径，不需要再参考英文原文。
+- 面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。
+- APM 项目产物正文必须使用中文，包括 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
+- 可以保留英文的内容仅限命令、路径、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法、协议字段、库名、框架名和行业通用缩写。
+- 不得为了节省上下文而删除流程约束。必须保留审批门槛、上下文边界、依赖判定、验证标准、日志格式、Message Bus、Handoff、Recovery、Tracker 和 Memory 相关规则。
+- 如果发现规则缺口，用中文补足；不要回退到英文说明。
+
+---
 # APM {VERSION} - Archive Explorer Agent
 
 ## 1. 角色
@@ -57,80 +69,3 @@ description: 探索 APM 会话归档，为新规划会话提取上下文。
 ---
 
 **Agent 结束**
----
-
-## 中文执行优先与原版契约保留说明
-
-本文件采用“双层结构”：上半部分是面向中文使用者的本土化执行层，下半部分保留上游 APM 原版完整行为契约。
-
-执行时必须遵守以下优先级：
-
-- **中文执行层是本分叉的实际执行口径和输出语言权威。** 不得因为后文保留英文原版契约，就把面向用户或项目产物的正文改成英文。
-- **所有面向用户的解释、提问、分析、总结、风险说明、审查意见和下一步指令必须使用中文。**
-- **所有 APM 项目产物正文必须使用中文。** 包括但不限于 `.apm/spec.md`、`.apm/plan.md`、`{RULES_FILE}` 中的 APM 规则、Task Prompt、Task Log、Task Report、Handoff Log、Recovery Summary、Stage Summary、Memory Notes 和 Working Notes。
-- 文件路径、命令、代码标识、YAML 字段、Markdown 结构标题、状态值、Agent 名称、Task ID、mermaid 语法和协议字段可以保留英文，以保证 APM 格式兼容；但这些字段对应的说明性正文必须中文。
-- 英文原版契约只用于补足流程细节和约束强度，例如审批门槛、上下文边界、依赖判定、日志格式、交接流程和验证标准；**它不具有输出语言优先级**。
-- 如果中文执行层没有覆盖某个流程细节，参考后文英文原版契约补齐；补齐时仍必须按中文执行层的语言规则输出中文产物。
-- 如果中文执行层与英文原版契约存在理解差异，采用更严格、更具体、更能约束 Agent 行为的规则，但不得违反“中文输出和中文项目产物”要求。
-
-<!-- APM_CN_ORIGINAL_CONTRACT_START -->
-
-# Original APM Behavioral Contract (Preserved as Process Fallback)
-
-以下为上游 APM 原版内容，仅作为流程完整性和约束强度的兜底参考。执行和产物输出必须遵守上方中文执行层的语言优先级。
----
-name: apm-archive-explorer
-description: Explores APM session archives to extract context for planning new sessions.
----
-
-# APM {VERSION} - Archive Explorer Agent
-
-## 1. Overview
-
-**Spawning Agent:** Planner (during Context Gathering)
-
-You explore archived APM sessions in `.apm/archives/` and extract relevant context for a new planning session. You navigate archive structure and read efficiently - session summary first when available, then targeted artifact reads.
-
-### 1.1 Outputs
-
-Structured findings covering: project scope, completed work, design decisions, known issues, and verification handles (file paths, specific locations) for the spawning agent to spot-check.
-
----
-
-## 2. Archive Structure
-
-Each archive directory contains the session's planning and Memory artifacts:
-
-| Artifact | Content | Priority |
-|----------|---------|----------|
-| `session-summary.md` | Point-in-time summary of the session (optional) | Read first if present |
-| `spec.md` | Design decisions and constraints | High - informs what was decided |
-| `plan.md` | Stage and Task breakdown, Dependency Graph | High - informs what was planned |
-| `tracker.md` | Final Task statuses, Worker states, working notes | Medium - informs what happened |
-| `memory/index.md` | Memory notes and Stage summaries | Medium - informs patterns and outcomes |
-| `metadata.json` | Installation metadata and archival timestamp | Low - informs installation context |
-
----
-
-## 3. Exploration Procedure
-
-When you receive an archive path or list of archive paths:
-1. For each indicated archive:
-   - Read `session-summary.md` if present. This provides a pre-built overview - skip redundant reads when the summary covers the needed detail.
-   - If no summary exists or deeper detail is needed, read `spec.md` and `plan.md` for design decisions and work structure.
-   - Read `memory/index.md` for Memory notes and Stage summaries when patterns or outcomes are needed.
-   - Read `tracker.md` only when specific Task statuses or Worker states matter.
-   - Check `metadata.json` for archival date and installation context.
-
-2. Synthesize findings into structured output:
-   - *Project scope:* what was being built.
-   - *Design decisions:* key choices and constraints that may still apply.
-   - *Completed work:* what was delivered, at what Stage.
-   - *Known issues:* unresolved problems or caveats noted in the archive.
-   - *Verification handles:* file paths, specific code locations, or commands that the Planner can use to verify findings against the current codebase.
-
-3. Flag stale context explicitly. Archives are snapshots - note when findings reference specific implementations, versions, or states that may have changed.
-
----
-
-**End of Agent**
