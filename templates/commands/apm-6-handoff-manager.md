@@ -1,61 +1,89 @@
 ---
 command_name: handoff-manager
-description: Perform a Handoff with an APM Manager.
+description: 执行 APM Manager Handoff。
 ---
 
-# APM {VERSION} - Manager Handoff Command
+# APM {VERSION} - Manager Handoff 命令
 
-## 1. Overview
+## 1. 目标
 
-This command initiates the Handoff procedure for a Manager approaching context window limits. You create two artifacts:
-- **Handoff Log:** Working context not captured in planning documents or Task Logs, stored in `.apm/memory/handoffs/manager/`.
-- **Handoff prompt:** Written to the Handoff Bus, instructing the incoming Manager to reconstruct context procedurally.
+当 Manager 的上下文窗口接近上限、发生自动压缩、输出质量下降，或用户要求交接时，执行本命令。
 
-The incoming Manager rebuilds working context from planning documents, guides, skills, Task Logs, and the Handoff Log - not from the Handoff Log alone.
+你需要创建两类产物：
 
----
+- **Handoff Log**：记录当前 Manager 实例已经完成、决定和观察到的内容，保存到 `.apm/memory/handoffs/manager/`。
+- **Handoff Prompt**：写入 `.apm/bus/manager/handoff.md`，指导下一个 Manager 如何重建上下文。
 
-## 2. Handoff Procedure
-
-Execute when User initiates Handoff.
-
-### 2.1 Handoff Log Creation
-
-Perform the following actions:
-1. Determine instance numbers: your current instance number and incoming Manager instance number (yours + 1).
-2. Create Handoff Log per §3 Handoff Log Structure, capturing **past actions** - what was done, decided, and observed. Content is strictly past tense; current state belongs in the handoff prompt.
-   - Coordination overview: Stages managed, Tasks reviewed, dispatch cycles completed.
-   - Tracked Worker Handoffs (which Workers, from which Stage) - most critical for dependency context treatment.
-   - If auto-compaction occurred during this instance, note it and describe which portions of working context are reconstructed rather than first-hand from the summary.
-   - VC state extracted from the Tracker in context: active branches, worktrees, pending merges.
-   - User preferences and communication patterns.
-   - Coordination insights, decisions made, approaches tried.
-
-### 2.2 Handoff Prompt Creation
-
-Perform the following actions:
-1. Create handoff prompt per §4 Handoff Prompt Structure, capturing **current state** - what is happening now. Content is actionable and present-tense; past actions belong in the Handoff Log.
-   - Outstanding Tasks in full: objectives, expected outputs, detailed instructions, review criteria, relevant Spec sections, dependency context, workspace information.
-   - Mid-review progress and pending review outcomes.
-   - Active Workers and their dispatch state.
-   - Pointers to Task Logs and files for the incoming Manager to read.
-
-### 2.3 User Review and Finalization
-
-Perform the following actions:
-1. Write handoff prompt to the Handoff Bus: `.apm/bus/manager/handoff.md`.
-2. Present both artifacts to User: Handoff Log (file path) and handoff prompt (bus path). Request review and direct User to start a new chat and run `/apm-2-initiate-manager` - the incoming Manager will auto-detect the handoff prompt.
-3. If modifications requested, update accordingly. This completes the outgoing Manager's duties.
+新的 Manager 不是只读 Handoff Log，而是结合规划文档、指南、skill、Task Logs 和 Handoff Log 重建上下文。
 
 ---
 
-## 3. Handoff Log Structure
+## 2. 执行流程
 
-Contains working context not captured in planning documents or Task Logs. The incoming Manager reconstructs primary context from artifacts - this file provides supplementary context.
+### 2.1 创建 Handoff Log
 
-**Location:** `.apm/memory/handoffs/manager/handoff-<NN>.log.md`
+执行以下动作：
 
-**YAML Frontmatter Schema:**
+1. 判断当前 Manager instance number 和下一个 Manager instance number。
+2. 创建 Handoff Log，记录过去发生的事情。内容使用过去时，不写当前待办状态。
+3. 必须覆盖：
+   - 已协调的 Stages；
+   - 已审查的 Tasks；
+   - 已完成的派发循环；
+   - 已发生的 Worker Handoffs；
+   - 当前实例发生过的自动压缩或恢复事件；
+   - 从 Tracker 提取的版本控制状态；
+   - 用户偏好和沟通模式；
+   - 重要协调判断、尝试过的方法和经验。
+
+### 2.2 创建 Handoff Prompt
+
+执行以下动作：
+
+1. 创建 Handoff Prompt，记录当前状态和下一步动作。内容必须可执行、使用现在时。
+2. 必须覆盖：
+   - 当前 Stage 和进度；
+   - outstanding Tasks 的完整信息；
+   - 正在审查的报告和未决结论；
+   - active Workers 和派发状态；
+   - 新 Manager 必须读取的 Task Logs 和文件；
+   - 立即下一步应该做什么。
+
+### 2.3 用户审查和完成
+
+1. 写入 Handoff Prompt：
+
+   ```text
+   .apm/bus/manager/handoff.md
+   ```
+
+2. 向用户展示 Handoff Log 路径和 Handoff Bus 路径，请用户审查。
+3. 指导用户新开 Manager 会话并运行：
+
+   ```text
+   /apm-2-initiate-manager
+   ```
+
+   Codex CLI 使用：
+
+   ```text
+   $apm-2-initiate-manager
+   ```
+
+4. 如果用户要求修改，更新产物后再结束。完成后，当前 Manager 不再继续协调。
+
+---
+
+## 3. Handoff Log 结构
+
+位置：
+
+```text
+.apm/memory/handoffs/manager/handoff-<NN>.log.md
+```
+
+YAML frontmatter：
+
 ```yaml
 ---
 agent: manager
@@ -66,35 +94,43 @@ stage: <N>
 ---
 ```
 
-**Field Descriptions:**
-- `agent`: Always `manager`.
-- `outgoing`: Current instance number.
-- `incoming`: Next instance number.
-- `handoff`: Handoff sequence number (equals the outgoing instance number).
-- `stage`: Current Stage number.
+正文结构：
 
-**Body:**
-- *Title:* `# Manager Handoff <N> (Manager <N> → Manager <N+1>)`. Each section uses `##` heading.
-- *Summary:* Stages coordinated, Tasks reviewed, dispatch cycles completed.
-- *Working Context.* Tracked Worker Handoffs table (Agent, Handoff Stage, current-Stage logs loaded, notes) with dependency context implication. VC state: active branches, worktrees, pending merges, base branch. Dispatch patterns.
-- *Working Notes:* Coordination insights, User preferences, decisions made, approaches tried.
+```markdown
+# Manager Handoff <N> (Manager <N> -> Manager <N+1>)
 
----
+## Summary
 
-## 4. Handoff Prompt Structure
+## Working Context
 
-Written to `.apm/bus/manager/handoff.md`. The incoming Manager processes this prompt during auto-detection in the init command.
+## Worker Handoffs
 
-**Required content:**
-- *Identity:* Outgoing and incoming instance numbers.
-- *Rebuilding context:*
-  1. Read Handoff Log - note tracked Worker Handoffs and VC state.
-  2. Read current-Stage Task Logs (all agents).
-  3. For previous-Stage dependency context encountered later: read the specific Task Log on demand. If the Task Log is insufficient, read referenced files to reconstruct context.
-- *Current State:* Current Stage, Stage progress, next Task, blockers, working notes.
-- *Immediate Next Action:* Specific coordination action to resume.
-- *Closing instruction:* Output a concise understanding summary (project state, Worker Handoffs and implications, VC state, next action) then proceed with coordination.
+## Version Control State
+
+## Working Notes
+```
 
 ---
 
-**End of Command**
+## 4. Handoff Prompt 结构
+
+写入：
+
+```text
+.apm/bus/manager/handoff.md
+```
+
+必须包含：
+
+- outgoing 和 incoming instance number；
+- 需要读取的 Handoff Log；
+- 需要读取的当前 Stage Task Logs；
+- previous-stage dependency context 的处理方式；
+- 当前 Stage、进度、阻塞点、working notes；
+- 立即下一步；
+- 要求新 Manager 先用中文输出简洁理解摘要，然后继续协调。
+
+---
+
+**命令结束**
+

@@ -8,6 +8,7 @@
     {
       "id": "copilot",
       "name": "GitHub Copilot",
+      "description": "适配 GitHub Copilot",
       "bundleName": "copilot.zip",
       "format": "markdown",
       "configDir": ".github",
@@ -17,8 +18,8 @@
         "guides": ".github/apm-guides",
         "agents": ".github/agents"
       },
-      "contextAttachSyntax": "Reference the file using `#file` and select the file from the picker.",
-      "newChatGuidance": "Start a new Copilot Chat",
+      "contextAttachSyntax": "使用 `#file` 引用文件，并从选择器中选中文件。",
+      "newChatGuidance": "新开一个 Copilot Chat",
       "subagentGuidance": {
         "hasSubagents": true,
         "toolSyntax": "#runSubagent",
@@ -30,6 +31,7 @@
     {
       "id": "claude",
       "name": "Claude Code",
+      "description": "适配 Claude Code",
       "bundleName": "claude.zip",
       "format": "markdown",
       "configDir": ".claude",
@@ -39,8 +41,8 @@
         "guides": ".claude/apm-guides",
         "agents": ".claude/agents"
       },
-      "contextAttachSyntax": "Reference the file using `@` followed by the file path.",
-      "newChatGuidance": "Open a new terminal and start Claude Code",
+      "contextAttachSyntax": "使用 `@` 加文件路径引用文件。",
+      "newChatGuidance": "新开一个终端并启动 Claude Code",
       "subagentGuidance": {
         "hasSubagents": true,
         "toolSyntax": "Agent(subagent_type=\"Explore\", prompt=\"...\")",
@@ -52,6 +54,7 @@
     {
       "id": "gemini",
       "name": "Gemini CLI",
+      "description": "适配 Gemini CLI",
       "bundleName": "gemini.zip",
       "format": "toml",
       "configDir": ".gemini",
@@ -61,19 +64,20 @@
         "guides": ".gemini/apm-guides",
         "agents": ".gemini/agents"
       },
-      "contextAttachSyntax": "Reference the file using `@` followed by the file path.",
-      "newChatGuidance": "Open a new terminal and start Gemini CLI",
+      "contextAttachSyntax": "使用 `@` 加文件路径引用文件。",
+      "newChatGuidance": "新开一个终端并启动 Gemini CLI",
       "subagentGuidance": {
         "hasSubagents": true,
         "toolSyntax": "@codebase_investigator <natural language query>",
         "explorerName": "codebase_investigator",
-        "configNote": "Requires `experimental.enableAgents: true` in ~/.gemini/settings.json"
+        "configNote": "需要在 ~/.gemini/settings.json 中设置 `experimental.enableAgents: true`"
       },
-      "postInstallNote": "Gemini CLI requires `experimental.enableAgents: true` in ~/.gemini/settings.json for subagent features."
+      "postInstallNote": "Gemini CLI 需要在 ~/.gemini/settings.json 中设置 `experimental.enableAgents: true` 才能使用 subagent 功能。"
     },
     {
       "id": "cursor",
       "name": "Cursor",
+      "description": "适配 Cursor",
       "bundleName": "cursor.zip",
       "format": "markdown",
       "configDir": ".cursor",
@@ -83,8 +87,8 @@
         "guides": ".cursor/apm-guides",
         "agents": ".cursor/agents"
       },
-      "contextAttachSyntax": "Reference the file using `@` and search for the file name.",
-      "newChatGuidance": "Start a new Cursor Agent chat",
+      "contextAttachSyntax": "使用 `@` 并搜索文件名来引用文件。",
+      "newChatGuidance": "新开一个 Cursor Agent chat",
       "subagentGuidance": {
         "hasSubagents": true,
         "toolSyntax": "Task(subagent_type=\"explore\", prompt=\"...\")",
@@ -96,6 +100,7 @@
     {
       "id": "opencode",
       "name": "OpenCode",
+      "description": "适配 OpenCode",
       "bundleName": "opencode.zip",
       "format": "markdown",
       "configDir": ".opencode",
@@ -105,8 +110,8 @@
         "guides": ".opencode/apm-guides",
         "agents": ".opencode/agents"
       },
-      "contextAttachSyntax": "Reference the file using `@` followed by the file name.",
-      "newChatGuidance": "Open a new terminal and start OpenCode",
+      "contextAttachSyntax": "使用 `@` 加文件名引用文件。",
+      "newChatGuidance": "新开一个终端并启动 OpenCode",
       "subagentGuidance": {
         "hasSubagents": true,
         "toolSyntax": "Task(subagent_type=\"explore\", prompt=\"...\")",
@@ -118,6 +123,7 @@
     {
       "id": "codex",
       "name": "Codex CLI",
+      "description": "适配 Codex CLI",
       "bundleName": "codex.zip",
       "format": "markdown",
       "configDir": ".codex",
@@ -127,15 +133,15 @@
         "guides": ".codex/apm-guides",
         "agents": ".codex/agents"
       },
-      "contextAttachSyntax": "Reference the file using `@` followed by the file path.",
-      "newChatGuidance": "Open a new terminal and start Codex CLI",
+      "contextAttachSyntax": "使用 `@` 加文件路径引用文件。",
+      "newChatGuidance": "新开一个终端并启动 Codex CLI",
       "subagentGuidance": {
         "hasSubagents": true,
         "toolSyntax": "spawn_agent(agent_type=\"explorer\", message=\"...\")",
         "explorerName": "explorer",
         "configNote": null
       },
-      "postInstallNote": "Codex CLI does not support custom slash commands. APM commands are installed as skills and invoked with the $ prefix (e.g., $apm-1-initiate-planner) instead of /slash-commands."
+      "postInstallNote": "Codex CLI 不支持自定义 slash commands。APM 命令会以 skills 形式安装，并使用 $ 前缀调用，例如 $apm-1-initiate-planner。"
     }
   ]
 }

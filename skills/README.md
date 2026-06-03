@@ -1,22 +1,14 @@
-# APM Standalone Skills
+# APM 独立 Skills
 
-Optional skills that live outside the main APM bundles. Unlike the skills installed by `apm init`, these are used on demand for specific situations.
+这里存放不随 `apm init` 主 bundle 自动安装的可选 skills。它们用于特定场景，例如解释 APM、迁移旧版本、定制中文分叉。
 
-## Available Skills
+## 可用 Skills
 
 ### apm-assist
 
-General-purpose APM assistant - explains concepts, detects installed versions, handles migration from v0.5.x, and answers questions from the live documentation. Works with any supported platform.
+通用 APM 助手。用于解释 APM 概念、检查安装状态、回答使用问题、辅助迁移旧版本。
 
-Download the skill file into your platform's skill directory. For Claude Code:
-
-```bash
-mkdir -p .claude/skills/apm-assist
-curl -sL https://raw.githubusercontent.com/sdi2200262/agentic-project-management/main/skills/apm-assist/SKILL.md \
-  -o .claude/skills/apm-assist/SKILL.md
-```
-
-The skill file is the same across all platforms - only the destination directory differs:
+不同平台只需要把同一个 `SKILL.md` 放到对应目录：
 
 | Platform | Skill directory |
 |---|---|
@@ -27,10 +19,22 @@ The skill file is the same across all platforms - only the destination directory
 | OpenCode | `.opencode/skills/apm-assist/` |
 | Codex CLI | `.agents/skills/apm-assist/` |
 
+Codex CLI 示例：
+
+```powershell
+mkdir .agents\skills\apm-assist
+copy skills\apm-assist\SKILL.md .agents\skills\apm-assist\SKILL.md
+```
+
 ### apm-customization
 
-Guides an AI agent through customizing APM templates, navigating the repository structure, making changes, building, and releasing. No installation needed - this skill is already present in any fork or template of this repository. The AI agent reads it directly from `skills/apm-customization/SKILL.md` when working within the repo. If your platform does not discover it automatically, copy it to the platform's skills directory (e.g., `.claude/skills/apm-customization/SKILL.md`).
+用于指导 AI 助手修改 APM 模板、构建 release、发布自定义仓库。它已经存在于本仓库中，AI 在仓库内工作时可以直接读取：
 
-## Contributing
+```text
+skills/apm-customization/SKILL.md
+```
 
-To propose a new standalone skill, open an issue or pull request on the [APM repository](https://github.com/sdi2200262/agentic-project-management).
+## 维护建议
+
+如果你维护中文分叉，优先保持这两个 skill 的中文说明与模板实际行为一致。
+

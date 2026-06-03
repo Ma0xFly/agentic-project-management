@@ -5,11 +5,33 @@ modified: <last modification note>
 
 # APM Spec
 
-## Overview
+## 项目概述
 
-## Workspace
+说明本项目要解决的问题、目标用户、核心价值和完成标准。
+
+## 范围
+
+### 包含内容
+
+列出本次 APM 会话明确要完成的功能、交付物或改造范围。
+
+### 不包含内容
+
+列出明确不做的内容，防止 Worker 自行扩大范围。
+
+## 需求和验收标准
+
+记录关键需求、业务规则和每项需求的验收方式。
+
+## 设计决策和约束
+
+记录已经确定的技术方向、架构约束、工具选择、兼容性要求、安全要求和禁止事项。
+
+## 工作区
+
+记录工作区结构、相关仓库、权威文档、重要路径、版本控制观察和 Planner 发现的项目事实。
 
 ---
 
-> **Notes:** [Planner notes for the Manager, if any]
+> **Manager Notes:** Planner 给 Manager 的补充说明（如有）。
 
