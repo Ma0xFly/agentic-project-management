@@ -7,23 +7,15 @@ modified: <last modification note>
 
 ## Workers
 
-列出本项目需要的 Workers。每个 Worker 应有明确领域边界。
-
-示例：
-
-```text
-- Frontend Agent
-- Backend Agent
-- QA Agent
-```
+<!-- Planner 在此写入 Worker 表格：| Worker | Domain | Description |。每个 Worker 必须有明确领域边界。 -->
 
 ## Stages
 
-按阶段组织工作。每个 Stage 应说明目标、Tasks、依赖关系和验证标准。
+<!-- Planner 在此写入 Stage 表格：| Stage | Name | Tasks | Agents |。Stage 是顺序里程碑，不是并行阶段。 -->
 
 ## Dependency Graph
 
-使用 Mermaid 表示关键 Task 依赖关系。
+<!-- Planner 在此写入 Mermaid 依赖图。直接依赖才画边；同 Agent 使用实线，跨 Agent 使用虚线。 -->
 
 ```mermaid
 graph TD
@@ -31,5 +23,4 @@ graph TD
 
 ---
 
-> **Manager Notes:** Planner 给 Manager 的补充说明（如有）。
-
+> **Notes:** [Planner 给 Manager 的补充说明，如边界划分原因、自然派发组合、关键路径、汇合点和需要整体验证的 Stage。]

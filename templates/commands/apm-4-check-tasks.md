@@ -33,4 +33,48 @@ description: 将 Task Prompt 交付给 APM Worker。
 ---
 
 **命令结束**
+---
 
+## 中文本土化与原版契约保留说明
+
+本文件采用“双层结构”：上半部分是面向中文使用者的本土化执行说明，下半部分保留上游 APM 原版完整行为契约。
+
+执行时必须遵守以下规则：
+
+- 中文部分用于快速理解角色、流程和关键动作，不能替代后文的原版完整契约。
+- 如果中文说明没有覆盖某个细节，必须继续遵守后文原版契约中的对应规则。
+- 如果中文说明与原版契约存在理解差异，采用更严格、更具体、更能约束 Agent 行为的规则。
+- 不得因为已经阅读中文说明而跳过后文的审批门槛、上下文边界、依赖判定、日志格式、交接流程或验证标准。
+
+<!-- APM_CN_ORIGINAL_CONTRACT_START -->
+
+# Original APM Behavioral Contract (Preserved)
+
+以下为上游 APM 原版内容，保留用于维持原项目的完整流程约束、Agent 行为边界和可回溯性。
+---
+command_name: check-tasks
+description: Deliver a Task Prompt to an APM Worker.
+---
+
+# APM {VERSION} - Worker Check Tasks Command
+
+Check your Task Bus for pending Task Prompts. If you are a Planner, Manager, or non-APM agent, concisely decline and take no action. This command replaces manual file referencing - you resolve your bus path from your registered identity or from the provided `[agent-id]` argument.
+
+Accepts an optional `[agent-id]` argument. If registered, ignore it (bus path already known). If not registered, the argument is required to resolve identity.
+
+**Procedure:**
+1. Determine registration state:
+   - If registered, resolve bus path from registration. Continue to step 3.
+   - If not registered, `{ARGS}` is required. If no argument provided, inform User that an agent-id is required.
+
+2. Resolve agent-id (unregistered Workers only): resolve `{ARGS}` against `.apm/bus/` directory names per `{SKILL_PATH:apm-communication}` §4.2 Agent ID Resolution. Initialize per `{COMMAND_PATH:apm-3-initiate-worker}` §2 Initiation.
+
+3. Read Task Bus at `.apm/bus/<agent-slug>/task.md`.
+   - If empty, inform User that no pending Task is available. Await next invocation.
+   - If content present, continue to step 4.
+
+4. Cross-validate `agent` field in YAML frontmatter against registered identity. Mismatch flags a routing error - decline and direct User to the correct Worker. Process the Task per `{GUIDE_PATH:task-execution}` §3 Task Execution Procedure.
+
+---
+
+**End of Command**

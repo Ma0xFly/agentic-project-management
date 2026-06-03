@@ -23,5 +23,4 @@ title: <Project Name>
 
 ## Working Notes
 
-记录 Manager 在执行过程中发现的协调信息、用户偏好、风险、阻塞点和需要后续关注的事实。
-
+<!-- Manager 在执行过程中记录临时协调信息、用户偏好、风险、阻塞点和需要后续关注的事实。Stage 结束时，将仍有长期价值的内容提炼到 Memory Notes。 -->
